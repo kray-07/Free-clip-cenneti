@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Futbol Klipleri</title>
+<style>
+:root{--bg:#0f1624;--card:#18223a;--tx:#f1f4fb;--mu:#94a0bb;--ac:#2f7df6;--bd:#2a3858;--ok:#22a06b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;align-items:center;gap:10px;padding:12px 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;border-bottom:1px solid var(--bd)}
+header h1{font-size:19px;margin:0;flex:1;font-weight:700}
+.ib{width:42px;height:42px;border:1px solid var(--bd);background:var(--card);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx);padding:0}
+.ib.on{border-color:var(--ok);color:var(--ok)}
+.burger{flex-direction:column;gap:5px}.burger i{display:block;width:18px;height:2px;background:var(--tx);border-radius:2px}
+.adm{font-size:12px;color:var(--ok);border:1px solid var(--ok);border-radius:20px;padding:4px 10px;display:none}
+main{padding:16px;max-width:640px;margin:0 auto}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.item video{width:100%;max-height:320px;background:#000;display:block}
+.ti{padding:12px 14px 4px;font-size:16px;font-weight:600}
+.sub{font-size:12px;color:var(--mu);padding:0 14px}
+.bx{display:flex;gap:8px;padding:12px 14px;flex-wrap:wrap}
+button.b{border:0;border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer;background:var(--ac);color:#fff;font-weight:600}
+button.s{background:transparent;border:1px solid var(--bd);color:var(--tx);font-weight:500}
+button.d{background:transparent;border:1px solid #7a2f3a;color:#ff8a98;font-weight:500}
+.empty{text-align:center;color:var(--mu);padding:40px 0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:10;align-items:center;justify-content:center;padding:16px}
+.ov.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:400px;max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 6px;font-size:18px}.modal p{margin:0 0 14px;color:var(--mu);font-size:13px}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 6px}
+input[type=text],input[type=password],select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font-size:15px}
+.pick{display:block;padding:14px;border:1px dashed var(--bd);border-radius:10px;text-align:center;cursor:pointer;font-size:14px;color:var(--mu)}
+.pick.ok{border-style:solid;border-color:var(--ok);color:var(--tx)}
+.msg{font-size:14px;margin-top:10px;min-height:18px}
+#side{position:fixed;top:0;bottom:0;left:0;width:min(86vw,340px);background:var(--card);border-right:1px solid var(--bd);transform:translateX(-100%);transition:.2s;z-index:12;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px;overflow:auto}
+#sov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:11}
+body.open #sov{display:block}body.open #side{transform:none}
+#prog{height:8px;background:var(--bd);border-radius:8px;margin-top:14px;overflow:hidden;display:none}
+#prog div{height:100%;width:0;background:var(--ac)}
+</style></head><body>
+<header>
+<button class="ib burger" id="bg" aria-label="Menü"><i></i><i></i><i></i></button>
+<h1>Futbol Klipleri</h1>
+<span class="adm" id="adm">Yönetici</span>
+<button class="ib" id="lock" aria-label="Yönetici girişi"><svg id="lk" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path id="sh" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
+</header>
+
+<div id="sov"></div>
+<aside id="side">
+<h2 style="margin:0 0 4px;font-size:18px">Video Düzenle</h2>
+<p style="color:var(--mu);font-size:13px;margin:0 0 6px">Telefonunuzdaki bir videoyu seçin ve görüntü ayarlarını yapın. Düzenlenen video siteye eklenmez, doğrudan galerinize kaydedilir.</p>
+<label>Video</label><label class="pick" id="pe"><span>Video seç</span><input id="ef" type="file" accept="video/*" hidden></label>
+<canvas id="pcv" style="width:100%;margin-top:12px;border-radius:10px;background:#000;display:none"></canvas>
+<button class="b s" id="pp" style="width:100%;margin-top:8px;display:none">Oynat / Durdur</button>
+<button class="b s" id="cmp" style="width:100%;margin-top:8px;display:none;user-select:none;-webkit-user-select:none;touch-action:none">Orijinali Görmek İçin Basılı Tutun</button>
+<div id="sl"></div>
+<button class="b s" id="rst" style="width:100%;margin-top:14px">Ayarları Sıfırla</button>
+<button class="b" id="go" style="width:100%;margin-top:16px">Uygula</button>
+<button class="b" id="gs" style="width:100%;margin-top:10px;background:var(--ok);display:none">Galeriye Kaydet</button>
+<button class="b d" id="cn" style="width:100%;margin-top:10px;display:none">İşlemi İptal Et</button>
+<div id="prog"><div></div></div><div class="msg" id="st" style="color:var(--mu)"></div>
+<p style="color:var(--mu);font-size:12px;margin-top:12px">İşlem klibin süresi kadar sürer. Bitene kadar sayfayı açık tutun.</p>
+</aside>
+
+<div class="ov" id="m1"><div class="modal">
+<h2>Yönetici Girişi</h2><p>Klip yüklemek için şifre giriniz.</p>
+<input type="password" id="pw" placeholder="Şifre" autocomplete="off">
+<div class="msg" id="pwm" style="color:#ff8a98"></div>
+<div class="bx" style="padding:12px 0 0"><button class="b" id="pwb" style="flex:1">Giriş Yap</button><button class="b s" data-close>İptal</button></div>
+</div></div>
+
+<div class="ov" id="m2"><div class="modal">
+<h2>Klip Yükle</h2><p>Başlık, video ve kapak fotoğrafı seçin.</p>
+<label style="margin-top:0">Klip başlığı</label><input type="text" id="ttl" maxlength="80" placeholder="Örnek: Haftanın golü">
+<label>Video</label><label class="pick" id="pv"><span>Video seç</span><input id="file" type="file" accept="video/*" hidden></label>
+<label>Kapak fotoğrafı</label><label class="pick" id="pc"><span>Kapak seç</span><input id="cov" type="file" accept="image/*" hidden></label>
+<div class="msg" id="msg"></div>
+<div class="bx" style="padding:12px 0 0"><button class="b" id="send" style="flex:1">Yükle</button><button class="b s" data-close>Kapat</button></div>
+<div class="bx" style="padding:8px 0 0"><button class="b d" id="out" style="flex:1">Yönetici Çıkışı</button></div>
+</div></div>
+
+<main><div id="list"></div></main>
+<script>
+const $=id=>document.getElementById(id);
+let db,clips=[],admin=false;
+try{admin=sessionStorage.getItem("adm")==="1"}catch(e){}
+const open=()=>new Promise((res,rej)=>{try{const r=indexedDB.open("klipler",1);r.onupgradeneeded=()=>r.result.createObjectStore("v",{keyPath:"id"});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
+const tx=(m,f)=>new Promise((res,rej)=>{if(!db)return res([]);const t=db.transaction("v",m),s=t.objectStore("v"),q=f(s);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)});
+async function load(){clips=(await tx("readonly",s=>s.getAll()))||[];clips.sort((a,b)=>b.id-a.id);render()}
+const mb=b=>(b/1048576).toFixed(1)+" MB";
+function mk(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
+function render(){
+ $("adm").style.display=admin?"block":"none";$("lock").className="ib"+(admin?" on":"");
+ $("sh").setAttribute("d",admin?"M8 11V7a4 4 0 0 1 7.5-2":"M8 11V7a4 4 0 0 1 8 0v4");
+ const l=$("list");l.innerHTML="";
+ if(!clips.length)l.append(mk("div","empty","Henüz klip yok."));
+ clips.forEach(c=>{
+  const d=mk("div","item");
+  const v=document.createElement("video");v.controls=true;v.playsInline=true;v.preload="metadata";if(c.cover)v.poster=URL.createObjectURL(c.cover);v.src=URL.createObjectURL(c.blob);
+  const bx=mk("div","bx");
+  const dl=mk("button","b","Galeriye İndir");dl.onclick=()=>save(c);
+  bx.append(dl);
+  if(admin){const rm=mk("button","b d","Sil");let t;rm.onclick=async()=>{if(rm.dataset.s){clearTimeout(t);await tx("readwrite",s=>s.delete(c.id));load()}else{rm.dataset.s=1;rm.textContent="Emin misiniz? Tekrar dokunun";t=setTimeout(()=>{delete rm.dataset.s;rm.textContent="Sil"},4000)}};bx.append(rm)}
+  d.append(v,mk("div","ti",c.name),mk("div","sub",(c.info?c.info+" - ":"")+mb(c.blob.size)),bx);l.append(d);
+ });
+}
+async function add(blob,name,info,cover){await tx("readwrite",s=>s.put({id:Date.now()+Math.floor(Math.random()*999),name,info:info||"",blob,cover:cover||null}));await load()}
+function toast(t){let e=$("toast");if(!e){e=mk("div");e.id="toast";e.style.cssText="position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card);border:1px solid var(--bd);padding:12px 16px;border-radius:10px;z-index:30;font-size:14px";document.body.append(e)}e.textContent=t;e.style.display="block";clearTimeout(e.t);e.t=setTimeout(()=>e.style.display="none",3000)}
+const save=c=>saveBlob(c.blob,c.name);
+async function saveBlob(blob,name){
+ const ext=(blob.type.includes("webm")||/\.webm$/i.test(name))?"webm":"mp4";
+ const fn=name.replace(/\.[^.]+$/,"")+"."+ext;
+ try{const f=new File([blob],fn,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}catch(e){if(e&&e.name==="AbortError")return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.append(a);a.click();a.remove();
+}
+const side=()=>document.body.classList.toggle("open");
+$("bg").onclick=side;$("sov").onclick=side;
+const show=(id,on)=>$(id).classList.toggle("show",on);
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{show("m1",false);show("m2",false)});
+$("lock").onclick=()=>{if(admin)show("m2",true);else{$("pw").value="";$("pwm").textContent="";show("m1",true)}};
+$("pwb").onclick=()=>{if($("pw").value==="147258369melo"){admin=true;try{sessionStorage.setItem("adm","1")}catch(e){}show("m1",false);show("m2",true);render()}else $("pwm").textContent="Şifre yanlış."};
+$("pw").onkeydown=e=>{if(e.key==="Enter")$("pwb").onclick()};
+$("out").onclick=()=>{admin=false;try{sessionStorage.removeItem("adm")}catch(e){}show("m2",false);render()};
+function pk(inp,box,def){$(inp).onchange=e=>{const f=e.target.files[0];$(box).firstChild.textContent=f?f.name:def;$(box).className="pick"+(f?" ok":"")}}
+pk("file","pv","Video seç");pk("ef","pe","Video seç");pk("cov","pc","Kapak seç");
+$("send").onclick=async()=>{
+ const vf=$("file").files[0],cf=$("cov").files[0],t=$("ttl").value.trim(),m=$("msg");
+ if(!t||!vf||!cf){m.style.color="#ff8a98";m.textContent="Başlık, video ve kapak fotoğrafı gerekli.";return}
+ $("send").disabled=true;m.style.color="var(--mu)";m.textContent="Yükleniyor...";
+ try{await add(vf,t,"",cf);m.style.color="var(--ok)";m.textContent="Klip yüklendi.";
+  $("ttl").value="";$("file").value="";$("cov").value="";$("pv").firstChild.textContent="Video seç";$("pc").firstChild.textContent="Kapak seç";$("pv").className=$("pc").className="pick"}
+ catch(e){m.style.color="#ff8a98";m.textContent="Yükleme başarısız oldu."}
+ $("send").disabled=false};
+const SL=[["br","Parlaklık",-50,50],["sa","Doygunluk",-100,100],["co","Kontrast",-50,50],["hi","Vurgula",-100,100],["sh","Gölge",-100,100],["te","Sıcaklık",-100,100],["vi","Vinyet",0,100]];
+let CMP=false;const P={};SL.forEach(x=>P[x[0]]=0);
+SL.forEach(([k,n,mn,mx])=>{const l=mk("label",0,n+" "),b=mk("b",0,"0");b.style.color="var(--tx)";const x=mk("button","b d","İptal");x.style.cssText="float:right;padding:3px 10px;font-size:12px;margin-top:-4px";l.append(b,x);const r=document.createElement("input");r.type="range";r.min=mn;r.max=mx;r.value=0;r.style.width="100%";r.oninput=()=>{P[k]=+r.value;b.textContent=r.value};x.onclick=()=>{r.value=0;r.oninput()};$("sl").append(l,r)});
+$("rst").onclick=()=>{$("sl").querySelectorAll("input").forEach(r=>r.value=0);$("sl").querySelectorAll("b").forEach(b=>b.textContent="0");SL.forEach(x=>P[x[0]]=0)};
+const VS="attribute vec2 p;varying vec2 u;void main(){u=p*.5+.5;gl_Position=vec4(p,0.,1.);}";
+const FS="precision mediump float;varying vec2 u;uniform sampler2D t;uniform float br,sa,co,hi,sh,te,vi;void main(){vec3 c=texture2D(t,vec2(u.x,1.-u.y)).rgb;c*=1.+br;float l=dot(c,vec3(.299,.587,.114));c=mix(vec3(l),c,1.+sa);c=(c-.5)*(1.+co)+.5;l=dot(c,vec3(.299,.587,.114));c+=hi*smoothstep(.4,1.,l)*.3+sh*(1.-smoothstep(0.,.6,l))*.3;c.r+=te*.1;c.b-=te*.1;c*=1.-vi*smoothstep(.2,.85,distance(u,vec2(.5)));gl_FragColor=vec4(clamp(c,0.,1.),1.);}";
+function mkGL(cv){const gl=cv.getContext("webgl",{preserveDrawingBuffer:true});if(!gl)return null;
+ const sd=(t,x)=>{const o=gl.createShader(t);gl.shaderSource(o,x);gl.compileShader(o);return o};
+ const pr=gl.createProgram();gl.attachShader(pr,sd(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sd(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+ gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+ const a=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+ gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
+ [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
+ const loc={};SL.forEach(x=>loc[x[0]]=gl.getUniformLocation(pr,x[0]));
+ return v=>{gl.viewport(0,0,cv.width,cv.height);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,v);for(const k in loc)gl.uniform1f(loc[k],CMP?0:P[k]/100);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}}
+const pre=document.createElement("video");pre.playsInline=true;pre.loop=true;let pg=null;
+$("ef").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;pre.src=URL.createObjectURL(f);
+ pre.onloadedmetadata=()=>{const c=$("pcv");c.width=480;c.height=Math.round(480*pre.videoHeight/pre.videoWidth);if(!pg)pg=mkGL(c);if(!pg){$("st").textContent="Bu tarayıcı video düzenlemeyi desteklemiyor.";return}c.style.display="block";$("pp").style.display="block";$("cmp").style.display="block"}});
+const cs=v=>e=>{e.preventDefault();CMP=v};["pointerdown"].forEach(t=>$("cmp").addEventListener(t,cs(true)));["pointerup","pointerleave","pointercancel"].forEach(t=>$("cmp").addEventListener(t,cs(false)));
+$("pp").onclick=()=>pre.paused?pre.play():pre.pause();$("pcv").onclick=$("pp").onclick;
+(function loop(){if(pg&&pre.readyState>=2)pg(pre);requestAnimationFrame(loop)})();
+$("go").onclick=async()=>{
+ const f=$("ef").files[0];if(!f){$("st").textContent="Önce bir video seçin.";return}
+ $("gs").style.display="none";pre.pause();
+ let canc=false;$("go").disabled=true;$("cn").style.display="block";$("prog").style.display="block";$("st").textContent="İşleniyor...";
+ try{
+  const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;
+  await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=j});
+  const w=v.videoWidth,h=v.videoHeight,cv=document.createElement("canvas");cv.width=w;cv.height=h;
+  const g=mkGL(cv);if(!g)throw 0;
+  const out=cv.captureStream();
+  try{(v.captureStream?v.captureStream():v.mozCaptureStream()).getAudioTracks().forEach(t=>out.addTrack(t))}catch(e){}
+  const mt=["video/mp4;codecs=avc1","video/webm;codecs=vp9","video/webm"].find(t=>MediaRecorder.isTypeSupported(t))||"";
+  const rec=new MediaRecorder(out,{mimeType:mt,videoBitsPerSecond:Math.round(w*h*30*0.12)});
+  const ch=[];rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+  const done=new Promise(r=>rec.onstop=r);
+  rec.start(500);await v.play();$("cn").onclick=()=>{canc=true;v.pause();v.dispatchEvent(new Event("ended"))};
+  const step=()=>{if(v.ended||canc)return;g(v);$("prog").firstChild.style.width=(v.currentTime/v.duration*100)+"%";v.requestVideoFrameCallback?v.requestVideoFrameCallback(step):requestAnimationFrame(step)};step();
+  await new Promise(r=>v.onended=r);
+  if(!canc)g(v);rec.stop();await done;
+  if(canc){$("st").textContent="İşlem iptal edildi. Ayarları değiştirip tekrar deneyebilirsiniz.";$("prog").firstChild.style.width="0";$("cn").style.display="none";$("go").disabled=false;return}
+  const type=mt.split(";")[0]||"video/webm",res=new Blob(ch,{type}),nm=f.name.replace(/\.[^.]+$/,"")+"_duzenlendi";
+  $("gs").onclick=()=>saveBlob(res,nm);$("gs").style.display="block";
+  $("st").textContent="Tamamlandı. Galeriye kaydetmek için aşağıdaki düğmeye dokunun.";$("prog").firstChild.style.width="100%";
+ }catch(e){$("st").textContent="İşlem bu tarayıcıda çalışmadı. Chrome veya güncel bir tarayıcı deneyin."}
+ $("cn").style.display="none";$("go").disabled=false};
+open().then(d=>{db=d;load()}).catch(()=>render());
+</script></body></html>
